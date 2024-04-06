@@ -108,7 +108,6 @@ switch ($metodo) {
 
     break;
     case 'PUT':
-        echo "put";
         //recupera i dati dall'header
         $body=file_get_contents('php://input');
     
@@ -121,8 +120,15 @@ switch ($metodo) {
             $json = json_encode($xml);
             $data = json_decode($json, true);
         }
+        //esempio body [{"ID":"6","comune":"bonate","cap":"24040"}]
+        $sql= "UPDATE `cap` SET `comune` = '".$data["comune"]."', `cap` = '".$data["cap"]."' WHERE `cap`.`ID` = ".$data["ID"];
 
-        $sql= "UPDATE `cap` SET `comune` = 'bonate sopra' WHERE `cap`.`ID` = 6";
+        if ($conn->query($sql) === TRUE) {
+            echo "Record updated successfully";
+        } else {
+            echo "Error: " . $sql . "<br>" . $conn->error;
+        }
+        
 
         break;
 
