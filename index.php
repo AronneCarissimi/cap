@@ -1,18 +1,19 @@
 <?php
-
-
-
-
-
 //elabora header
 $metodo=$_SERVER["REQUEST_METHOD"];
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $uri = explode( '/', $uri );
 
 //legge il tipo di contenuto inviato dal client
+if (isset($_SERVER["CONTENT_TYPE"])){
 $ct=$_SERVER["CONTENT_TYPE"];
 $type=explode("/",$ct);
-
+}
+else{
+    $type=array();
+    $type[0]="application";
+    $type[1]="json";
+}
 //legge il tipo di contenuto di ritorno richiesto dal client
 $retct=$_SERVER["HTTP_ACCEPT"];
 $ret=explode("/",$retct);
@@ -38,7 +39,7 @@ switch ($metodo) {
     case 'GET':
         
     if ($uri[3]!=""){
-        $sql = "SELECT comune,cap FROM cap WHERE comune='".$uri[3]."'";
+        $sql = "SELECT * FROM cap WHERE comune='".$uri[3]."'";
         $result = $conn->query($sql);
                 if ($result->num_rows > 0) {
                     $rows = array();
@@ -55,11 +56,11 @@ switch ($metodo) {
                         echo $xml->asXML();
                     }
                 } else {
-                    echo "0 resultssssss";
+                    echo "0 results";
                 }
             }
             else{
-                $sql = "SELECT comune,cap FROM cap";
+                $sql = "SELECT * FROM cap";
                 $result = $conn->query($sql);
                 if ($result->num_rows > 0) {
                     $rows = array();
@@ -83,13 +84,46 @@ switch ($metodo) {
         break;
 
     case 'POST':
-        echo "post";
-        http_response_code(404);
-        break;
+        //recupera i dati dall'header
+        $body=file_get_contents('php://input');
 
+        //esempio body {"comune":"bonate","cap":"24040"}
+
+        //converte in array associativo
+        if ($type[1]=="json"){
+            $data = json_decode($body,true);
+        }
+        if ($type[1]=="xml"){
+            $xml = simplexml_load_string($body);
+            $json = json_encode($xml);
+            $data = json_decode($json, true);
+        }
+
+        $sql = "INSERT INTO cap (comune, cap) VALUES ('".$data["comune"]."', '".$data["cap"]."')";
+        if ($conn->query($sql) === TRUE) {
+            echo "New record created successfully";
+        } else {
+            echo "Error: " . $sql . "<br>" . $conn->error;
+        }
+
+    break;
     case 'PUT':
         echo "put";
-        http_response_code(404);
+        //recupera i dati dall'header
+        $body=file_get_contents('php://input');
+    
+        //converte in array associativo
+        if ($type[1]=="json"){
+            $data = json_decode($body,true);
+        }
+            if ($type[1]=="xml"){
+            $xml = simplexml_load_string($body);
+            $json = json_encode($xml);
+            $data = json_decode($json, true);
+        }
+
+        $sql= "UPDATE `cap` SET `comune` = 'bonate sopra' WHERE `cap`.`ID` = 6";
+
         break;
 
     case 'DELETE':
@@ -103,9 +137,3 @@ switch ($metodo) {
         break;
 
 }
-
-
-
-
-
-
