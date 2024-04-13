@@ -8,8 +8,8 @@ do {
     $first = array_shift($uri);
 } while ($first != 'api');
 
-//print $uri
-print_r($uri);
+
+//print_r($uri);
 
 
 
@@ -155,7 +155,13 @@ switch ($metodo) {
         $json = json_encode($xml);
         $data = json_decode($json, true);
     }
+    $sql= "DELETE FROM `cap` WHERE `cap`.`ID` = ".$data["ID"];
 
+    if ($conn->query($sql) === TRUE) {
+        echo "Record deleted successfully";
+    } else {
+        echo "Error: " . $sql . "<br>" . $conn->error;
+    }
     
         break;
 
