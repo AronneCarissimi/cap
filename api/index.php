@@ -111,7 +111,7 @@ switch ($metodo) {
 
         $sql = "INSERT INTO cap (comune, cap) VALUES ('".$data["comune"]."', '".$data["cap"]."')";
         if ($conn->query($sql) === TRUE) {
-            echo "New record created successfully";
+            echo json_encode($data);
         } else {
             echo "Error: " . $sql . "<br>" . $conn->error;
         }
@@ -131,10 +131,10 @@ switch ($metodo) {
             $data = json_decode($json, true);
         }
         //esempio body [{"ID":"6","comune":"bonate","cap":"24040"}]
-        $sql= "UPDATE `cap` SET `comune` = '".$data["comune"]."', `cap` = '".$data["cap"]."' WHERE `cap`.`ID` = ".$data["ID"];
+        $sql= "UPDATE `cap` SET `comune` = '".$data["comune"]."', `cap` = '".$data["cap"]."' WHERE `cap`.`id` = ".$data["id"];
 
         if ($conn->query($sql) === TRUE) {
-            echo "Record updated successfully";
+            echo json_encode($data);
         } else {
             echo "Error: " . $sql . "<br>" . $conn->error;
         }
@@ -155,10 +155,10 @@ switch ($metodo) {
         $json = json_encode($xml);
         $data = json_decode($json, true);
     }
-    $sql= "DELETE FROM `cap` WHERE `cap`.`ID` = ".$data["ID"];
+    $sql= "DELETE FROM `cap` WHERE `cap`.`id` = ".$data["id"];
 
     if ($conn->query($sql) === TRUE) {
-        echo "Record deleted successfully";
+        echo json_encode($data);
     } else {
         echo "Error: " . $sql . "<br>" . $conn->error;
     }

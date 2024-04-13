@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>comuni</title>
+        <style>
+            table,
+            th,
+            td {
+                border: 1px solid rgb(0, 0, 0);
+                border-collapse: collapse;
+            }
+        </style>
+    </head>
+
+    <body>
+        <table id="tabella">
+            <tr>
+                <th>comune</th>
+                <th>cap</th>
+                <th>elimina</th>
+                <th>modifica</th>
+            </tr>
+        </table>
+
+        <p>aggiung comune</p>
+        <input type="text" id="nuovoComune" />
+        <input type="text" id="nuovoCap" />
+        <button onclick="aggiungiComune()">aggiungi</button>
+
+        <script>
+            async function eliminaRiga(id) {
+                const res = await fetch("./api", {
+                    method: "DELETE",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        id,
+                    }),
+                });
+                const data = await res.json();
+                console.log(data);
+                document.getElementById(id).remove();
+            }
+
+            async function modificaRiga(id) {
+                const comune =
+                    document.getElementById(id).children[0].children[0].value;
+
+                const cap =
+                    document.getElementById(id).children[1].children[0].value;
+
+                console.log(comune, cap, id);
+
+                const res = await fetch("./api", {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        id,
+                        comune,
+                        cap,
+                    }),
+                });
+                const data = await res.json();
+                console.log(data);
+            }
+
+            function ottieniComuni() {
+                var xhr = new XMLHttpRequest();
+                xhr.open("GET", "./api", true);
+                xhr.onreadystatechange = function () {
+                    console.log(this.readyState);
+                    console.log(this.status + ": " + this.statusText);
+                    if (this.readyState == 4 && this.status == 200) {
+                        console.log(this.responseText);
+                        let comuni = JSON.parse(this.responseText);
+                        let tabella = document.getElementById("tabella");
+                        for (let i = 0; i < comuni.length; i++) {
+                            let riga = document.createElement("tr");
+                            riga.id = comuni[i].id;
+
+                            let comune = document.createElement("td");
+                            let inputComune = document.createElement("input");
+                            inputComune.type = "text";
+                            inputComune.value = comuni[i].comune;
+                            comune.appendChild(inputComune);
+                            riga.appendChild(comune);
+
+                            let cap = document.createElement("td");
+                            let inputCap = document.createElement("input");
+                            inputCap.type = "text";
+                            inputCap.value = comuni[i].cap;
+                            cap.appendChild(inputCap);
+                            riga.appendChild(cap);
+
+                            let elimina = document.createElement("td");
+                            let buttonElimina =
+                                document.createElement("button");
+                            buttonElimina.textContent = "elimina";
+                            buttonElimina.onclick = function () {
+                                eliminaRiga(comuni[i].id);
+                            };
+                            elimina.appendChild(buttonElimina);
+                            riga.appendChild(elimina);
+                            let modifica = document.createElement("td");
+                            let buttonModifica =
+                                document.createElement("button");
+                            buttonModifica.textContent = "invio";
+                            buttonModifica.onclick = function () {
+                                modificaRiga(comuni[i].id);
+                            };
+                            modifica.appendChild(buttonModifica);
+                            riga.appendChild(modifica);
+                            tabella.appendChild(riga);
+                        }
+                    }
+                };
+                xhr.send();
+            }
+
+            document.addEventListener("DOMContentLoaded", function () {
+                ottieniComuni();
+            });
+
+            async function aggiungiComune() {
+                const comune = document.getElementById("nuovoComune").value;
+                const cap = document.getElementById("nuovoCap").value;
+                console.log(comune, cap);
+                const res = await fetch("./api", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        comune,
+                        cap,
+                    }),
+                });
+                const data = await res.json();
+                console.log(data);
+                //ottieniComuni();
+            }
+        </script>
+    </body>
+</html>
