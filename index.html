@@ -25,13 +25,28 @@
         </table>
 
         <p>aggiung comune</p>
-        <input type="text" id="nuovoComune" />
-        <input type="text" id="nuovoCap" />
-        <button onclick="aggiungiComune()">aggiungi</button>
+        <table>
+            <tr>
+                <th>comune</th>
+                <th>cap</th>
+                <th>aggiungi</th>
+            </tr>
+            <tr>
+                <td>
+                    <input type="text" id="nuovoComune" />
+                </td>
+                <td>
+                    <input type="number" id="nuovoCap" />
+                </td>
+                <td>
+                    <button onclick="aggiungiComune()">aggiungi</button>
+                </td>
+            </tr>
+        </table>
 
         <script>
             async function eliminaRiga(id) {
-                const res = await fetch("./api", {
+                const res = await fetch("./api/", {
                     method: "DELETE",
                     headers: {
                         "Content-Type": "application/json",
@@ -54,7 +69,7 @@
 
                 console.log(comune, cap, id);
 
-                const res = await fetch("./api", {
+                const res = await fetch("./api/", {
                     method: "PUT",
                     headers: {
                         "Content-Type": "application/json",
@@ -69,68 +84,12 @@
                 console.log(data);
             }
 
-            function ottieniComuni() {
-                var xhr = new XMLHttpRequest();
-                xhr.open("GET", "./api", true);
-                xhr.onreadystatechange = function () {
-                    console.log(this.readyState);
-                    console.log(this.status + ": " + this.statusText);
-                    if (this.readyState == 4 && this.status == 200) {
-                        console.log(this.responseText);
-                        let comuni = JSON.parse(this.responseText);
-                        let tabella = document.getElementById("tabella");
-                        for (let i = 0; i < comuni.length; i++) {
-                            let riga = document.createElement("tr");
-                            riga.id = comuni[i].id;
-
-                            let comune = document.createElement("td");
-                            let inputComune = document.createElement("input");
-                            inputComune.type = "text";
-                            inputComune.value = comuni[i].comune;
-                            comune.appendChild(inputComune);
-                            riga.appendChild(comune);
-
-                            let cap = document.createElement("td");
-                            let inputCap = document.createElement("input");
-                            inputCap.type = "text";
-                            inputCap.value = comuni[i].cap;
-                            cap.appendChild(inputCap);
-                            riga.appendChild(cap);
-
-                            let elimina = document.createElement("td");
-                            let buttonElimina =
-                                document.createElement("button");
-                            buttonElimina.textContent = "elimina";
-                            buttonElimina.onclick = function () {
-                                eliminaRiga(comuni[i].id);
-                            };
-                            elimina.appendChild(buttonElimina);
-                            riga.appendChild(elimina);
-                            let modifica = document.createElement("td");
-                            let buttonModifica =
-                                document.createElement("button");
-                            buttonModifica.textContent = "invio";
-                            buttonModifica.onclick = function () {
-                                modificaRiga(comuni[i].id);
-                            };
-                            modifica.appendChild(buttonModifica);
-                            riga.appendChild(modifica);
-                            tabella.appendChild(riga);
-                        }
-                    }
-                };
-                xhr.send();
-            }
-
-            document.addEventListener("DOMContentLoaded", function () {
-                ottieniComuni();
-            });
-
             async function aggiungiComune() {
+                console.log("aggiungiComune");
                 const comune = document.getElementById("nuovoComune").value;
                 const cap = document.getElementById("nuovoCap").value;
                 console.log(comune, cap);
-                const res = await fetch("./api", {
+                const res = await fetch("./api/", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -142,8 +101,38 @@
                 });
                 const data = await res.json();
                 console.log(data);
-                //ottieniComuni();
+                ottieniComuni();
             }
+
+            function ottieniComuni() {
+                var xhr = new XMLHttpRequest();
+                xhr.open("GET", "./api/", true);
+                xhr.onreadystatechange = function () {
+                    console.log(this.readyState);
+                    console.log(this.status + ": " + this.statusText);
+                    if (this.readyState == 4 && this.status == 200) {
+                        console.log(this.responseText);
+                        let comuni = JSON.parse(this.responseText);
+                        let tabella = document.getElementById("tabella");
+                        let dentro =
+                            "<tr><th>comune</th><th>cap</th><th>elimina</th><th>modifica</th></tr>";
+                        for (let i = 0; i < comuni.length; i++) {
+                            dentro += `<tr id="${comuni[i].id}">
+                                <td><input type="text" value="${comuni[i].comune}" /></td>
+                                <td><input type="number" value="${comuni[i].cap}" max="99999" /></td>
+                                <td><button onclick="eliminaRiga(${comuni[i].id})">elimina</button></td>
+                                <td><button onclick="modificaRiga(${comuni[i].id})">modifica</button></td>
+                            </tr>`;
+                        }
+                        tabella.innerHTML = dentro;
+                    }
+                };
+                xhr.send();
+            }
+
+            document.addEventListener("DOMContentLoaded", function () {
+                ottieniComuni();
+            });
         </script>
     </body>
 </html>
